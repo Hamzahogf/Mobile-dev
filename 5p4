@@ -1,0 +1,177 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: TodoApp(),
+    );
+  }
+}
+
+class TodoApp extends StatefulWidget {
+  @override
+  _TodoAppState createState() => _TodoAppState();
+}
+
+class _TodoAppState extends State<TodoApp> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  
+  List<TodoItem> todos = [
+    TodoItem("Buy groceries", false),
+    TodoItem("Finish homework", false),
+    TodoItem("Call mom", true),
+    TodoItem("Read book", false),
+    TodoItem("Go to gym", true),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  void toggleTodo(int index) {
+    setState(() {
+      todos[index].isCompleted = !todos[index].isCompleted;
+    });
+  }
+
+  void addTodo(String text) {
+    setState(() {
+      todos.add(TodoItem(text, false));
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    List<TodoItem> pendingTodos = todos.where((todo) => !todo.isCompleted).toList();
+    List<TodoItem> completedTodos = todos.where((todo) => todo.isCompleted).toList();
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('ToDo App'),
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: [
+            Tab(text: 'To Do (${pendingTodos.length})'),
+            Tab(text: 'Completed (${completedTodos.length})'),
+          ],
+        ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          // Pending Todos Tab
+          Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: pendingTodos.length,
+                    itemBuilder: (context, index) {
+                      return Card(
+                        child: ListTile(
+                          title: Text(pendingTodos[index].title),
+                          trailing: IconButton(
+                            icon: Icon(Icons.check),
+                            onPressed: () {
+                              int originalIndex = todos.indexOf(pendingTodos[index]);
+                              toggleTodo(originalIndex);
+                            },
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          // Completed Todos Tab
+          Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: completedTodos.length,
+                    itemBuilder: (context, index) {
+                      return Card(
+                        color: Colors.green[50],
+                        child: ListTile(
+                          title: Text(
+                            completedTodos[index].title,
+                            style: TextStyle(decoration: TextDecoration.lineThrough),
+                          ),
+                          trailing: IconButton(
+                            icon: Icon(Icons.undo),
+                            onPressed: () {
+                              int originalIndex = todos.indexOf(completedTodos[index]);
+                              toggleTodo(originalIndex);
+                            },
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (context) {
+              TextEditingController controller = TextEditingController();
+              return AlertDialog(
+                title: Text('Add New Todo'),
+                content: TextField(controller: controller),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text('Cancel'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      if (controller.text.isNotEmpty) {
+                        addTodo(controller.text);
+                        Navigator.pop(context);
+                      }
+                    },
+                    child: Text('Add'),
+                  ),
+                ],
+              );
+            },
+          );
+        },
+        child: Icon(Icons.add),
+      ),
+    );
+  }
+}
+
+class TodoItem {
+  String title;
+  bool isCompleted;
+
+  TodoItem(this.title, this.isCompleted);
+}
