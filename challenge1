@@ -1,0 +1,203 @@
+//this file was created by Student.Hamza Faiz AHMED FOUATIH; challenge 1 in MOBILE DEV
+import 'dart:math';
+
+import 'package:flutter/material.dart';
+
+class Game extends StatefulWidget {
+  const Game({super.key});
+
+  @override
+  State<Game> createState() => _GameState();
+}
+
+class _GameState extends State<Game> {
+  var from_jar = -1;
+  var to_jar = -1;
+  var selected_jar = -1;
+  var win = false ;
+
+  List<List<Color>> bars = [
+    [Colors.red, Colors.green],
+    [Colors.blue, Colors.green, Colors.yellow],
+    [Colors.red],
+    [],
+  ];
+
+  @override
+  void initState(){
+    super.initState();
+    shuffle();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+        home: Scaffold(
+            appBar: AppBar(title: Text('Water Sort Puzzle')),
+            body: Column(
+              children: [
+                Expanded(
+                  child: Center(
+                      child: Column(
+                          children: [
+                              Text('Water Sort Puzzle Game Board', style: TextStyle(fontSize: 20)),
+                              SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+                              Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                      for (int b = 0; b < bars.length; b++) 
+                                          GestureDetector(
+                                            onTap: () {handled(b);},
+                                            child: Container(
+                                                width: MediaQuery.of(context).size.width * 0.18,
+                                                margin: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width * 0.02),
+                                                height: MediaQuery.of(context).size.height * 0.21,
+                                                decoration: BoxDecoration(
+                                                    border: Border.all(color: selected_jar != b ? Colors.blue : const Color.fromARGB(255, 7, 54, 50), width: MediaQuery.of(context).size.width * 0.01),
+                                                    borderRadius: BorderRadius.circular(MediaQuery.of(context).size.width * 0.029)
+                                                ),
+                                                child: Column(
+                                                    mainAxisAlignment: MainAxisAlignment.end,
+                                                    children: [
+                                                        for (int i = 0; i < bars[b].length; i++)
+                                                            Container(
+                                                                width: MediaQuery.of(context).size.width * 0.179,
+                                                                height: MediaQuery.of(context).size.height * 0.05,
+                                                                color: bars[b][i],
+                                                            )
+                                                    ],
+                                                ),
+                                            ),
+                                          )
+                                  ],
+                              ),
+                              SizedBox(height: MediaQuery.of(context).size.height * 0.05),
+                              win
+                              ? Text("WEL DONE !!!, play again", style: TextStyle(color: Colors.green, fontSize: 20))
+                              : SizedBox(height: 0)
+                          ],
+                      ),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(bottom: MediaQuery.of(context).size.height * 0.03),
+                  child: SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.4,
+                      height: MediaQuery.of(context).size.height * 0.04,
+                      child: ElevatedButton(
+                          onPressed: () {shuffle(); reset();},
+                          style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                          foregroundColor: Colors.white,
+                          ),
+                          child: const Text('Play Again',style: TextStyle(fontWeight: FontWeight.bold)),
+                          ),
+                  ),
+                ),
+              ],
+            )
+        )
+    );
+  }
+
+  void shuffle(){
+    win = false;
+    
+    do {
+        // get all colors
+        List<Color> all = [];
+        for (var bar in bars) {
+            all.addAll(bar);
+        }
+
+        //shuffle
+        all.shuffle();
+
+        //clear all bars
+        for (int i = 0; i<bars.length; i++){
+            bars[i].clear();
+        }
+
+        //distribute
+        var random = Random();
+        for (var color in all) {
+            // Get a list of bars that have space
+            List<int> availableBars = [];
+            for (int i = 0; i < bars.length; i++) {
+                if (bars[i].length < 4) {
+                    availableBars.add(i);
+                }
+            }
+            
+            // Randomly select one of the available bars
+            if (availableBars.isNotEmpty) {
+                int randomBarIndex = availableBars[random.nextInt(availableBars.length)];
+                bars[randomBarIndex].add(color);
+            }
+        }
+    } while (winer()); // Keep shuffling if it's a winning arrangement
+  
+    setState(() {});
+  }
+  
+  void handled(b){
+
+    if(win==false){
+        if (from_jar == -1) {
+                from_jar = b;
+                selected_jar = b;
+                setState(() {});
+            } else if (b == from_jar) {
+                reset();
+            } else {
+                to_jar = b;
+                moveWater();
+            }
+    }
+
+  }
+
+  void moveWater(){
+    if(bars[from_jar].isEmpty){
+        reset();
+        return; //added
+    }
+
+    if (bars[to_jar].isEmpty || bars[to_jar].first == bars[from_jar].first) {
+        if(bars[to_jar].length < 4){
+            bars[to_jar].insert(0, bars[from_jar][0]);
+            bars[from_jar].removeAt(0);
+            setState(() {});
+        }
+    }
+    var check = winer();
+    if(check){
+        win = true;
+    }
+
+    reset();
+  }
+
+  void reset(){
+    from_jar=-1;
+    to_jar=-1;
+    selected_jar = -1;
+    setState(() {});
+  }
+
+  bool winer(){
+    for (var b in bars){    
+        if (b.length==0){
+            continue;
+        }
+        var d = b[0];
+        for (var c in b){
+            if(d != c){
+                return false;
+            }
+        }
+    }
+    return true;
+  }
+
+}
