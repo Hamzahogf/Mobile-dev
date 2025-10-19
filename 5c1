@@ -1,0 +1,79 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: StringReverser(),
+    );
+  }
+}
+
+class StringReverser extends StatefulWidget {
+  @override
+  _StringReverserState createState() => _StringReverserState();
+}
+
+class _StringReverserState extends State<StringReverser> {
+  String inputText = '';
+  String reversedText = '';
+
+  void reverseString() {
+    setState(() {
+      reversedText = inputText.split('').reversed.join('');
+    });
+  }
+
+  bool isPalindrome(String text) {
+    if (text.isEmpty) return false;
+    String cleanText = text.replaceAll(' ', '').toLowerCase();
+    return cleanText == cleanText.split('').reversed.join('');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('String Reverser'),
+      ),
+      body: Padding(
+        padding: EdgeInsets.all(20.0),
+        child: Column(
+          children: [
+            TextField(
+              onChanged: (text) {
+                setState(() {
+                  inputText = text;
+                  reversedText = text.split('').reversed.join('');
+                });
+              },
+              decoration: InputDecoration(
+                labelText: 'Enter text',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            SizedBox(height: 20),
+            Text(
+              'Reversed: $reversedText',
+              style: TextStyle(fontSize: 18),
+            ),
+            SizedBox(height: 20),
+            if (isPalindrome(inputText) && inputText.isNotEmpty)
+              Text(
+                'Palindrome!',
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Colors.green,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
