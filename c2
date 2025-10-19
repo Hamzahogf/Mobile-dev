@@ -1,0 +1,184 @@
+// this file was created by Student.Hamza Faiz AHMED FOUATIH LAB4-W5
+import 'package:flutter/material.dart';
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'login',
+      home: const TemperatureConverter(),
+    );
+  }
+}
+
+class TemperatureConverter extends StatefulWidget {
+  const TemperatureConverter({super.key});
+
+  @override
+  State<TemperatureConverter> createState() => _TemperatureConverterState();
+}
+
+class _TemperatureConverterState extends State<TemperatureConverter> {
+  List<Map<String,dynamic>> data = [
+    {'username': 'student1', 'password': '123', 'name': 'Ali'},
+    {'username': 'student2', 'password': '103', 'name': 'Aya'},
+    {'username': 'student3', 'password': '203', 'name': 'Ahmed'},
+  ]; 
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController passController = TextEditingController();
+  var is_verified = false;
+  var error = false;
+  late String name;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Sample App'),
+        backgroundColor: Colors.blue 
+      ),
+      body: !is_verified
+      ? Column(
+        children: [
+          Expanded(
+            child: Column(
+               children: [
+                Center(
+                  child: Image.asset('assets/ensia.jpg', width: 200, height: 200)
+                ),
+                SizedBox(height: 5),
+                Center(
+                  child: Text("Sign in")
+                ),
+                SizedBox(height: 5),
+                Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      children: [
+                        TextField(
+                          controller: nameController,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Color.fromARGB(255, 254, 254, 252),
+                            hintText: "User Name",
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12), // makes corners circular
+                              borderSide: BorderSide(color: Colors.grey),  // removes the border line
+                            ),
+                          )
+                        ),
+                        SizedBox(height: 5),
+                        TextField(
+                          controller: passController,
+                          obscureText: true,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Color.fromARGB(255, 255, 255, 255),
+                            hintText: "Password",
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12), // makes corners circular
+                              borderSide: BorderSide(color: Colors.grey), // removes the border line
+                            ),
+                          )
+                        )
+                      ],
+                    ),
+                  ),
+                SizedBox(height: 5),
+                Center(child: Text("Forget Password", style: TextStyle(color: Colors.blue))),
+                SizedBox(height: 5),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.8,
+                  height: MediaQuery.of(context).size.height * 0.05,
+                  child: ElevatedButton(
+                    onPressed: () { check(nameController.text, passController.text); },
+                    child:  Text('Login', style: TextStyle(color: Colors.white)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))
+                    ),
+                  ),
+                ),
+                SizedBox(height: 5),
+                Center(
+                  child: RichText(
+                  text: TextSpan(
+                    text: "Does not have account? ",
+                    style: const TextStyle(color: Colors.black, fontSize: 16),
+                    children: [
+                      TextSpan(
+                        text: "Sign in",
+                        style: const TextStyle(
+                          color: Colors.blue, // different color
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  ),
+                ),
+                
+              ],
+            ),
+          ),
+          error?
+          Padding(
+            padding: const EdgeInsets.only(bottom: 2.0),
+            child: Text("Incorrect username or password, try again", style: TextStyle(color: Colors.red)),
+          )
+          :SizedBox()
+        ],
+      )
+      : Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text("Hello $name"),
+            SizedBox(height: 15),
+            SizedBox(
+              width: MediaQuery.of(context).size.width * 0.8,
+              height: MediaQuery.of(context).size.height * 0.05,
+              child: ElevatedButton(
+                onPressed: () { by(); },
+                child:  Text('Log out', style: TextStyle(color: Colors.white)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))
+                ),
+              ),
+            )
+          ],
+        ),
+      )
+    );
+  }
+
+  void check(user, pass){
+    for (var v in data){
+      if(v['username']==user && v['password'] == pass){
+        is_verified = true;
+        error = false;
+        name = v['name'];
+        setState(() {});
+        return;
+      }
+    }
+    if(user!='' && pass !=''){
+      error = true;
+      setState(() {});
+    }
+    
+  }
+
+  void by(){
+    is_verified = false;
+    name = '';
+    nameController.clear();
+    passController.clear(); 
+    setState(() {});
+  }
+}
