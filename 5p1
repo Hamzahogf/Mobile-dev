@@ -1,0 +1,153 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: TicTacToe(),
+    );
+  }
+}
+
+class TicTacToe extends StatefulWidget {
+  @override
+  _TicTacToeState createState() => _TicTacToeState();
+}
+
+class _TicTacToeState extends State<TicTacToe> {
+  List<List<String>> board = List.generate(3, (_) => List.filled(3, ''));
+  bool isXTurn = true;
+  String winner = '';
+  bool gameOver = false;
+  int moveCount = 0;
+
+  void makeMove(int row, int col) {
+    if (board[row][col].isEmpty && !gameOver) {
+      setState(() {
+        board[row][col] = isXTurn ? 'X' : 'O';
+        moveCount++;
+        
+        // Check for winner
+        winner = checkWinner();
+        if (winner.isNotEmpty) {
+          gameOver = true;
+        } else if (moveCount == 9) {
+          // It's a draw
+          gameOver = true;
+          winner = 'Draw';
+        } else {
+          isXTurn = !isXTurn;
+        }
+      });
+    }
+  }
+
+  String checkWinner() {
+    // Check rows
+    for (int i = 0; i < 3; i++) {
+      if (board[i][0].isNotEmpty &&
+          board[i][0] == board[i][1] &&
+          board[i][1] == board[i][2]) {
+        return board[i][0];
+      }
+    }
+
+    // Check columns
+    for (int i = 0; i < 3; i++) {
+      if (board[0][i].isNotEmpty &&
+          board[0][i] == board[1][i] &&
+          board[1][i] == board[2][i]) {
+        return board[0][i];
+      }
+    }
+
+    // Check diagonals
+    if (board[0][0].isNotEmpty &&
+        board[0][0] == board[1][1] &&
+        board[1][1] == board[2][2]) {
+      return board[0][0];
+    }
+
+    if (board[0][2].isNotEmpty &&
+        board[0][2] == board[1][1] &&
+        board[1][1] == board[2][0]) {
+      return board[0][2];
+    }
+
+    return '';
+  }
+
+  void resetGame() {
+    setState(() {
+      board = List.generate(3, (_) => List.filled(3, ''));
+      isXTurn = true;
+      winner = '';
+      gameOver = false;
+      moveCount = 0;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Tic Tac Toe'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              gameOver
+                  ? winner == 'Draw'
+                      ? "It's a Draw!"
+                      : 'Player $winner Wins!'
+                  : 'Current Player: ${isXTurn ? 'X' : 'O'}',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 20),
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.black, width: 2),
+              ),
+              child: Column(
+                children: List.generate(3, (row) {
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(3, (col) {
+                      return GestureDetector(
+                        onTap: () => makeMove(row, col),
+                        child: Container(
+                          width: 80,
+                          height: 80,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.black),
+                          ),
+                          child: Center(
+                            child: Text(
+                              board[row][col],
+                              style: TextStyle(fontSize: 40),
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+                  );
+                }),
+              ),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: resetGame,
+              child: Text('Reset Game'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
