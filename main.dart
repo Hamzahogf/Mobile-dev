@@ -1,5 +1,3 @@
-import 'dart:async';
-import 'dart:math';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -13,180 +11,154 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'min max rand',
-      home: const RandomNumberScreen (),
+      title: 'Binary Converter',
+      home: const BinaryConverter(),
     );
   }
 }
 
-class RandomNumberScreen extends StatefulWidget {
-  const RandomNumberScreen({super.key});
+class BinaryConverter  extends StatefulWidget {
+  const BinaryConverter ({super.key});
 
   @override
-  State<RandomNumberScreen> createState() => _RandomNumberScreenState();
+  State<BinaryConverter> createState() => _BinaryConverterState();
 }
 
-class _RandomNumberScreenState extends State<RandomNumberScreen> {
-  int randomNumber = 0;
-  int min = 0;
-  int max = 100;
+class _BinaryConverterState extends State<BinaryConverter> {
+  final TextEditingController tempController = TextEditingController();
+  String mode = 'Binary';
+  String output = '';
 
-  final TextEditingController minController = TextEditingController();
-  final TextEditingController maxController = TextEditingController();
-
-  void generateRandomNumber() {
-    int currentMin = int.tryParse(minController.text) ?? 0;
-    int currentMax = int.tryParse(maxController.text) ?? 100;
-    if (currentMin > currentMax) {
-      // swap if min > max
-      int temp = currentMin;
-      currentMin = currentMax;
-      currentMax = temp;
+  void wiw(String value) {
+    if (value.isEmpty) {
+      setState(() => output = '');
+      return;
     }
 
-    setState(() {
-      min = currentMin;
-      max = currentMax;
-      randomNumber = Random().nextInt(max - min + 1) + min;
-    });
+    try{
+      if(mode=='Binary'){
+        // validate binary inout
+        if(!RegExp(r'^[01]+$').hasMatch(value)){
+          setState(() => output = 'Invalid binary');
+          return;
+        }
+        int decimal = int.parse(value, radix:2);
+        setState(() => output = decimal.toString());
+      } else {
+        int number = int.tryParse(value) ?? 0;
+        setState(() => output = number.toRadixString(2));
+      }
+    } catch(e) {
+      setState(() => output = 'Error');
+    }
   }
 
-  Widget buildNumberButton(String label) {
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.all(4),
-        child: ElevatedButton(
-          onPressed: () {
-            final controller = minFocus ? minController : maxController;
-
-            if (label == '<') {
-              // Delete last character
-              if (controller.text.isNotEmpty) {
-                controller.text =
-                    controller.text.substring(0, controller.text.length - 1);
-              }
-            } else if (label == '>') {
-              // You can define some action for '>' if needed
-            } else {
-              // Append number
-              controller.text += label;
-            }
-          },
-          style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.all(20),
-            backgroundColor: (label == '<' || label == '>') 
-              ? Colors.blueGrey 
-              : Colors.grey[300],
-
-            shadowColor: (label == '<' || label == '>') 
-              ? Colors.transparent 
-              : null,
-          ),
-          child: label == '<' 
-            ? const Icon(Icons.backspace, size: 24) // use icon for '<'
-            : Text(
-                label,
-                style: const TextStyle(fontSize: 24),
-              ),
-        ),
-      ),
-    );
-  }
-
-
-  bool minFocus = true;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.amber,
-      body: SafeArea(
-        child:  Column(
-            children: [
-              // Random number display
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20),
-                child: Text(
-                  '$randomNumber',
-                  style: const TextStyle(
-                      fontSize: 48, fontWeight: FontWeight.bold),
+      body: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Stack(
+              alignment: Alignment.topCenter,
+              children: [
+                ClipPath(
+                  clipper: TriangleClipper(),
+                  child: Container(
+                    width: double.infinity,
+                    height: 300,
+                    color: Colors.red,
+                  ),
                 ),
-              ),
-
-              // Min / Max inputs
-              Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Center(
-                            child: Text("Min"),
-                          ),
-                          TextField(
-                            controller: minController,
-                            keyboardType: TextInputType.none, 
-                            textAlign: TextAlign.center,// disable system keyboard
-                            onTap: () => setState(() => minFocus = true),
-                            decoration: const InputDecoration(
-                              filled: true,
-                              fillColor: Colors.amber,
-                              border: InputBorder.none,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Center(
-                            child: Text("Max"),
-                          ),
-                          TextField(
-                            controller: maxController,
-                            keyboardType: TextInputType.none,
-                            textAlign: TextAlign.center,
-                            onTap: () => setState(() => minFocus = false),
-                            decoration: const InputDecoration(
-                              filled: true,
-                              fillColor: Colors.amber,
-                              border: InputBorder.none,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 40),
-
-              Expanded(
-                child: Container(
-                  color: Colors.blueGrey, // use color instead of backgroundColor
-                  padding: const EdgeInsets.only(left: 8, top: 8, right: 8),
+                Padding(
+                  padding: const EdgeInsets.only(top: 20),
                   child: Column(
                     children: [
-                      Row(children: ['7', '8', '9'].map(buildNumberButton).toList()),
-                      Row(children: ['4', '5', '6'].map(buildNumberButton).toList()),
-                      Row(children: ['1', '2', '3'].map(buildNumberButton).toList()),
-                      Row(children: ['>', '0', '<'].map(buildNumberButton).toList()),
+                      const Text(
+                        "Converter",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       const SizedBox(height: 20),
-                      ElevatedButton(
-                        onPressed: generateRandomNumber,
-                        child: const Text('Generate'),
+                      DropdownButton<String>(
+                        value: mode,
+                        items: <String>['Binary', 'Decimal'].map((String value) {
+                          return DropdownMenuItem(
+                              value: value, child: Text(value));
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            mode = value!;
+                          });
+                        },
+                        underline: Container(), 
+                        dropdownColor: Colors.red,
+                        alignment: Alignment.center,
+                      ),
+                      const SizedBox(height: 20),
+                      SizedBox(
+                        width: 100,
+                        child: TextField(
+                          controller: tempController,
+                          keyboardType: TextInputType.number,
+                          textAlign: TextAlign.center,
+                          decoration: const InputDecoration(
+                            filled: true,
+                            fillColor: Colors.red,
+                            border: InputBorder.none,
+                            hintText: "2",
+                          ),
+                          onChanged: wiw,
+                        ),
                       ),
                     ],
                   ),
                 ),
-              )
-            ],
-          ),
-      ),
+              ],
+            ),
+            const SizedBox(height: 50),
+            Text(output),
+            const SizedBox(height: 10),
+            Text(mode == 'Binary' ? "Decimal" : "Binary",),
+          ],
+        ),
     );
   }
+}
+
+class TriangleClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final path = Path();
+    
+    // Draw rectangular part - full width and most of height
+    path.addRect(Rect.fromLTWH(0, 0, size.width, size.height - 100));
+
+    // Draw upside-down triangle with rounded top
+    path.moveTo(0, size.height - 100); // Start at bottom-left corner of rectangle
+    path.lineTo(size.width, size.height - 100); // Line to bottom-right corner of rectangle
+    
+    // Create rounded top using quadratic Bezier curve
+    path.quadraticBezierTo(
+      size.width / 2 + 25, // Control point X (adjust for roundness width)
+      size.height, // Control point Y (at bottom)
+      size.width / 2, size.height // End point (bottom center)
+    );
+    
+    path.quadraticBezierTo(
+      size.width / 2 - 25, // Control point X (adjust for roundness width)
+      size.height, // Control point Y (at bottom)
+      0, size.height - 100 // Back to start point
+    );
+    
+    path.close();
+
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }
